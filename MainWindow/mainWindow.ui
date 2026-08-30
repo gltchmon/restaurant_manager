@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QStackedWidget" name="main_stackedWidget">
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="page"/>
+      <widget class="QWidget" name="page_2"/>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>33</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_option_menu">
+    <property name="title">
+     <string>Menu</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_option_sales">
+    <property name="title">
+     <string>Sales</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_option_expenses">
+    <property name="title">
+     <string>Expenses</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_option_account">
+    <property name="title">
+     <string>Account</string>
+    </property>
+    <addaction name="action_logOut"/>
+    <addaction name="action_delete_account"/>
+   </widget>
+   <addaction name="menu_option_menu"/>
+   <addaction name="menu_option_sales"/>
+   <addaction name="menu_option_expenses"/>
+   <addaction name="menu_option_account"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="action_logOut">
+   <property name="text">
+    <string>Log out</string>
+   </property>
+  </action>
+  <action name="action_delete_account">
+   <property name="text">
+    <string>Delete account</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
