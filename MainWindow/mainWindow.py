@@ -2,6 +2,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QHBoxLayout, QMainWindow
 from MainWindow.ui_mainWindow import Ui_MainWindow
 from Sales.sales_widget import SalesWidget
+from Menu.menu_widget import MenuWidget
 
 # main window that holds all other widgets 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -11,6 +12,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setWindowTitle("Manage Restaurant")
         self.sales_widget = SalesWidget(rest_id)
+        self.menu_widget = MenuWidget(rest_id)
+
+        # adding widgets to main window
         self.main_stackedWidget.addWidget(self.sales_widget)
+        self.main_stackedWidget.addWidget(self.menu_widget)
         self.main_stackedWidget.setCurrentIndex(0)
+
+        self.action_manage_menu.triggered.connect(lambda: self.menu_clicked("menu"))
+
+    def menu_clicked(self,action):
+        if action == "menu":
+            self.main_stackedWidget.setCurrentIndex(1)
+
         

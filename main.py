@@ -62,3 +62,6 @@ if __name__ == "__main__":
     app.exec()
 
   # PUSH TO GIT AND CREATE MAIN WINDOW
+
+  # command to compile code
+  # pyside6-uic widget.ui > widget_2.ui # then convert to utf8
