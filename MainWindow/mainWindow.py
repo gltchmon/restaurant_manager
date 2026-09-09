@@ -12,17 +12,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setWindowTitle("Manage Restaurant")
         self.sales_widget = SalesWidget(rest_id)
-        self.menu_widget = MenuWidget(rest_id)
+        self.menu_widget = MenuWidget(rest_id,self.sales_widget)
 
         # adding widgets to main window
         self.main_stackedWidget.addWidget(self.sales_widget)
         self.main_stackedWidget.addWidget(self.menu_widget)
-        self.main_stackedWidget.setCurrentIndex(0)
+        self.main_stackedWidget.setCurrentIndex(1)
 
         self.action_manage_menu.triggered.connect(lambda: self.menu_clicked("menu"))
-
+        self.action_manage_sales.triggered.connect(lambda: self.menu_clicked("sales"))
     def menu_clicked(self,action):
         if action == "menu":
             self.main_stackedWidget.setCurrentIndex(1)
+        else:
+            self.main_stackedWidget.setCurrentIndex(0)
 
         

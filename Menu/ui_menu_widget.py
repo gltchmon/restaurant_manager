@@ -90,10 +90,6 @@ class Ui_Form(object):
         self.frame_3.setFrameShadow(QFrame.Shadow.Raised)
         self.horizontalLayout = QHBoxLayout(self.frame_3)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.pushButton = QPushButton(self.frame_3)
-        self.pushButton.setObjectName(u"pushButton")
-
-        self.horizontalLayout.addWidget(self.pushButton)
 
         self.menu_deleteItems_button = QPushButton(self.frame_3)
         self.menu_deleteItems_button.setObjectName(u"menu_deleteItems_button")
@@ -114,7 +110,6 @@ class Ui_Form(object):
         self.label.setText(QCoreApplication.translate("Form", u"Item name:", None))
         self.label_2.setText(QCoreApplication.translate("Form", u"Price:", None))
         self.menu_addItem_button.setText(QCoreApplication.translate("Form", u"Add item to menu", None))
-        self.pushButton.setText(QCoreApplication.translate("Form", u"Update item price", None))
-        self.menu_deleteItems_button.setText(QCoreApplication.translate("Form", u"Delete items from menu", None))
+        self.menu_deleteItems_button.setText(QCoreApplication.translate("Form", u"Delete item from menu", None))
     # retranslateUi
 

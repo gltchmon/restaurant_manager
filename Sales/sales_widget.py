@@ -113,6 +113,7 @@ class SalesWidget(QWidget, Ui_sales_widget):
 
 # adding menu to combo box
     def get_menu_items(self):
+        self.add_sales_item_name_comboBox.clear()
         response = (db.supabase.rpc('get_all_menu_items').execute())
         if response.data:
             for item in response.data:
@@ -186,7 +187,13 @@ class SalesWidget(QWidget, Ui_sales_widget):
             # format the sales
             data = item.split(" | ")
             date_sold = datetime.strptime(data[0],"%d-%m-%Y").date()
+            # FIX DELETING ITEMS
             response = db.supabase.table("restaurant_menu").select("menu_item!inner(id)").eq("menu_item.name",data[1]).execute()
+            print(response)
+            if not response:
+                QMessageBox.critical(self,"Item not in menu", "This sale cannot be added as item does not exist in your menu.\n Please add this item to your menu and try again.", QMessageBox.StandardButton.Ok)
+                self.add_sales_listWidget.clear()
+                return
             item_id = response.data[0]['menu_item']['id']
             quantity = data[2]
             total = data[3]
@@ -234,8 +241,8 @@ class SalesWidget(QWidget, Ui_sales_widget):
 
     # helper function to find the name of items from id
     def get_item_name_by_id(self,id):
-        response = (db.supabase.table("restaurant_menu").select("menu_item!inner(name)").eq("menu_item.id",id).execute())
-        name = response.data[0]['menu_item']['name']
+        response = (db.supabase.table("menu_item").select("name").eq("id",id).execute())
+        name = response.data[0]['name']
         return name 
 
 # GENERAL BUTTONS TO VIEW SALES
@@ -254,7 +261,9 @@ class SalesWidget(QWidget, Ui_sales_widget):
             self.display_rows(response.data, "Week")
         self.view_sales_delete_button.hide()
 
-  
+    def delete_item_in_comboBox(self):
+        response = db.supabase.table("restaurant_menu").select()
+
 
 # view all sales by month
     def view_monthly_sales(self):
