@@ -85,11 +85,18 @@ class Ui_manage_sales_widget(object):
         self.view_sales_tableWidget.horizontalHeader().setDefaultSectionSize(150)
 
         self.verticalLayout_2.addWidget(self.view_sales_tableWidget)
+        self.horizontalLayout_buttons = QHBoxLayout()
+
+        self.view_sales_edit_button = QPushButton(self.tab)
+        self.view_sales_edit_button.setObjectName(u"view_sales_edit_button")
+
+        self.horizontalLayout_buttons.addWidget(self.view_sales_edit_button)
 
         self.view_sales_delete_button = QPushButton(self.tab)
         self.view_sales_delete_button.setObjectName(u"view_sales_delete_button")
 
-        self.verticalLayout_2.addWidget(self.view_sales_delete_button)
+        self.horizontalLayout_buttons.addWidget(self.view_sales_delete_button)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_buttons)
 
         self.manage_sales_tabWidget.addTab(self.tab, "")
         self.tab_2 = QWidget()
@@ -211,7 +218,8 @@ class Ui_manage_sales_widget(object):
         ___qtablewidgetitem2.setText(QCoreApplication.translate("manage_sales_widget", u"Quantity", None))
         ___qtablewidgetitem3 = self.view_sales_tableWidget.horizontalHeaderItem(3)
         ___qtablewidgetitem3.setText(QCoreApplication.translate("manage_sales_widget", u"Total", None))
-        self.view_sales_delete_button.setText(QCoreApplication.translate("manage_sales_widget", u"Delete selected sales ", None))
+        self.view_sales_delete_button.setText(QCoreApplication.translate("manage_sales_widget", u"Delete sale ", None))
+        self.view_sales_edit_button.setText(QCoreApplication.translate("manage_sales_widget", u"Edit sale ", None))
         self.manage_sales_tabWidget.setTabText(self.manage_sales_tabWidget.indexOf(self.tab), QCoreApplication.translate("manage_sales_widget", u"View sales", None))
         self.label.setText(QCoreApplication.translate("manage_sales_widget", u"Date:", None))
         self.label_2.setText(QCoreApplication.translate("manage_sales_widget", u"Item name:", None))

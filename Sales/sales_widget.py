@@ -1,5 +1,6 @@
 import PySide6
-from PySide6.QtWidgets import QAbstractItemView, QMessageBox,QWidget
+from PySide6.QtWidgets import QAbstractItemView, QMessageBox,QWidget, QTableWidgetItem
+from PySide6.QtCore import Qt
 from Sales.ui_sales_widget import Ui_manage_sales_widget as Ui_sales_widget
 from datetime import date
 from datetime import datetime
@@ -7,6 +8,7 @@ from Sales.search_dialogs.day_dialog import DayDialog
 from Sales.search_dialogs.year_dialog import YearDialog
 from Sales.search_dialogs.month_dialog import MonthDialog
 from Sales.search_dialogs.item_dialog import ItemDialog
+from Sales.Edit_sale_dialog.edit_sale_dialog import EditSaleDialog
 import calendar
 import requests
 from Database import db
@@ -49,6 +51,9 @@ class SalesWidget(QWidget, Ui_sales_widget):
         self.item_dialog.item_view_all_button.clicked.connect(self.get_sales_by_item_dialog)
         self.item_dialog.item_year_button.clicked.connect(self.get_sales_by_item_dialog)
         self.item_dialog.item_month_button.clicked.connect(self.get_sales_by_item_dialog)
+
+        self.edit_sale_dialog = EditSaleDialog(self)
+        self.view_sales_edit_button.clicked.connect(self.edit_sale_helper)
 
         # add menu items to comboBoxes
         self.get_menu_items()
@@ -105,7 +110,7 @@ class SalesWidget(QWidget, Ui_sales_widget):
         self.view_sales_search_comboBox.addItem("Item")
         self.view_sales_search_comboBox.addItem("-")
 
-        self.view_sales_delete_button.clicked.connect(self.find_sale_id)
+        self.view_sales_delete_button.clicked.connect(self.delete_sale)
         self.show()
         
         # adding functionality to delete button
@@ -122,6 +127,7 @@ class SalesWidget(QWidget, Ui_sales_widget):
                 self.add_sales_item_name_comboBox.addItem(item_name)
                 # adding items to item combo box
                 self.item_dialog.item_select_item_comboBox.addItem(f"{item_name}")
+        print("added items")
 
 # change total price whenever the quantity has changed
     def change_price(self):
@@ -211,7 +217,7 @@ class SalesWidget(QWidget, Ui_sales_widget):
         # get all sales
         response = (
             db.supabase.table("sale_made")
-            .select("*",count="exact").order("date", desc=True).execute()
+            .select("*",count="exact").order("id", desc=True).execute()
         )
         if response.data:
             self.view_sales_tableWidget.setRowCount(response.count)
@@ -222,6 +228,7 @@ class SalesWidget(QWidget, Ui_sales_widget):
             self.view_sales_tableWidget.setHorizontalHeaderItem(1, PySide6.QtWidgets.QTableWidgetItem("Item"))
             self.view_sales_tableWidget.setHorizontalHeaderItem(2, PySide6.QtWidgets.QTableWidgetItem("Quantity"))
             self.view_sales_tableWidget.setHorizontalHeaderItem(3, PySide6.QtWidgets.QTableWidgetItem("Total"))
+            
             self.view_sales_tableWidget.setStyleSheet("font-size: 15pt;") 
             counter = 0
             # get data from each sale
@@ -232,12 +239,16 @@ class SalesWidget(QWidget, Ui_sales_widget):
                 total = sale['total']
                 date_sold =  datetime.strptime(sale['date'], '%Y-%m-%d').date()
                 date_sold = date_sold.strftime("%d-%b-%Y")
+                sale_id = sale['id']
+                item_name_obj = QTableWidgetItem(item_name)
+                item_name_obj.setData(Qt.UserRole,sale_id) # store sale id
                 self.view_sales_tableWidget.setItem(counter,0,PySide6.QtWidgets.QTableWidgetItem(date_sold))
-                self.view_sales_tableWidget.setItem(counter, 1, PySide6.QtWidgets.QTableWidgetItem(item_name))
+                self.view_sales_tableWidget.setItem(counter, 1, item_name_obj)
                 self.view_sales_tableWidget.setItem(counter, 2, PySide6.QtWidgets.QTableWidgetItem(f"{quantity}"))
                 self.view_sales_tableWidget.setItem(counter, 3, PySide6.QtWidgets.QTableWidgetItem(f"£{total}"))
                 counter+=1
         self.view_sales_delete_button.show()
+        self.view_sales_edit_button.show()
 
     # helper function to find the name of items from id
     def get_item_name_by_id(self,id):
@@ -261,10 +272,6 @@ class SalesWidget(QWidget, Ui_sales_widget):
             self.display_rows(response.data, "Week")
         self.view_sales_delete_button.hide()
 
-    def delete_item_in_comboBox(self):
-        response = db.supabase.table("restaurant_menu").select()
-
-
 # view all sales by month
     def view_monthly_sales(self):
         self.view_sales_tableWidget.clear()
@@ -272,6 +279,7 @@ class SalesWidget(QWidget, Ui_sales_widget):
         if response.data:
             self.display_rows(response.data, "Month")
         self.view_sales_delete_button.hide()
+        self.view_sales_edit_button.hide()
 # view all sales by year
     def view_yearly_sales(self):
             self.view_sales_tableWidget.clear()
@@ -290,6 +298,7 @@ class SalesWidget(QWidget, Ui_sales_widget):
                     self.view_sales_tableWidget.setItem(row_count, 0,PySide6.QtWidgets.QTableWidgetItem(year))
                     self.view_sales_tableWidget.setItem(row_count, 1,PySide6.QtWidgets.QTableWidgetItem(f"£{total}"))
             self.view_sales_delete_button.hide()
+            self.view_sales_edit_button.hide()
 
     def open_search_dialog(self,text):
         match text:
@@ -323,13 +332,16 @@ class SalesWidget(QWidget, Ui_sales_widget):
                 item_name = sale['name']
                 quantity = sale['quantity']
                 total = sale['total']
+                item_name_obj = QTableWidgetItem(item_name)
+                item_name_obj.setData(Qt.UserRole,sale['id']) # store sale id
                 self.view_sales_tableWidget.setItem(row_count, 0,PySide6.QtWidgets.QTableWidgetItem(date_sold))
                 self.view_sales_tableWidget.setItem(row_count, 1,
-                                                    PySide6.QtWidgets.QTableWidgetItem(item_name))
+                                                    item_name_obj)
                 self.view_sales_tableWidget.setItem(row_count, 2,
                                                     PySide6.QtWidgets.QTableWidgetItem(f"{quantity}"))
                 self.view_sales_tableWidget.setItem(row_count, 3, PySide6.QtWidgets.QTableWidgetItem(f"£{total}"))
             self.view_sales_delete_button.show()
+            self.view_sales_edit_button.show()
             self.view_sales_search_comboBox.setCurrentIndex(4)
             self.day_dialog.close()
         else:
@@ -360,7 +372,6 @@ class SalesWidget(QWidget, Ui_sales_widget):
                 case _:
                     response = (db.supabase.rpc('get_all_sales_from_month', params={'month':month, 'year':year}).execute())
                     self.display_sales_by_month(response.data,checked_button,None, None)
-            self.view_sales_delete_button.hide()
         else:
             error_message = QMessageBox.critical(None, "Choose a display option",
                                                  f"You must check one of the display options to view sales on specified month. Please try again",
@@ -429,25 +440,23 @@ class SalesWidget(QWidget, Ui_sales_widget):
                     QMessageBox.StandardButton.Ok)
         self.item_dialog.close()
 
-# DELETE SALE 
-    def delete_sale(self):
+# DELETE SALE from table widget
+    def delete_sale_from_table(self):
         selected_row = self.view_sales_tableWidget.currentRow()
         self.view_sales_tableWidget.removeRow(selected_row)
-# FIND SALE ID 
-    def find_sale_id(self):
+# delete sale from db
+    def delete_sale(self):
         selected_row = self.view_sales_tableWidget.selectedItems()
-        selected_row_items = [cell.text() for cell in selected_row]
-        sale_date = self.str_to_date(selected_row_items[0]).strftime("%Y-%m-%d")
-        sale_total = selected_row_items[3][1:]
-        item_id = (db.supabase.table("menu_item").select("id").eq("name", selected_row_items[1]).execute()).data[0]['id']
-        sale_id = (db.supabase.rpc("get_sale_id", params={"date":sale_date,"item_id": item_id, "quantity": selected_row_items[2], "total": sale_total}).execute())
-        if sale_id.data:
-            self.delete_sale()
-            db.supabase.table("sale_made").delete().eq("id",sale_id.data[0]['id']).execute()
-        else:
-            print("sale id not found")
+        if selected_row:
+            sale_id = selected_row[1].data(Qt.UserRole)
+            db.supabase.table("sale_made").delete().eq("id",sale_id).execute()
+            self.delete_sale_from_table()
         
-
+    def edit_sale_helper(self):
+        selected_row = self.view_sales_tableWidget.selectedItems()
+        if selected_row:
+            item = selected_row[1]
+            self.edit_sale_dialog.edit_sale(item)
 # HELPER FUNCTIONS 
     def display_rows(self, sales,col_name1):
         self.view_sales_tableWidget.clear()
@@ -475,6 +484,7 @@ class SalesWidget(QWidget, Ui_sales_widget):
             self.view_sales_tableWidget.setItem(row_count, 1,
                                                 PySide6.QtWidgets.QTableWidgetItem(f"£{sale['total']}"))
         self.view_sales_delete_button.hide()
+        self.view_sales_edit_button.hide()
 
     def display_all_rows(self,sales):
         self.view_sales_tableWidget.clear()
@@ -486,16 +496,19 @@ class SalesWidget(QWidget, Ui_sales_widget):
         self.view_sales_tableWidget.setHorizontalHeaderItem(2, PySide6.QtWidgets.QTableWidgetItem(f"Quantity"))
         self.view_sales_tableWidget.setHorizontalHeaderItem(3, PySide6.QtWidgets.QTableWidgetItem(f"Total"))
         for row_count, sale in enumerate(sales):
+            item_name_obj = QTableWidgetItem(sale['name'])
+            item_name_obj.setData(Qt.UserRole,sale['id']) # store sale id
             self.view_sales_tableWidget.setItem(row_count, 0,
                                                     PySide6.QtWidgets.QTableWidgetItem(
                                                         self.str_to_date(sale['date']).strftime("%d-%b-%Y")))
             self.view_sales_tableWidget.setItem(row_count, 1,
-                                                PySide6.QtWidgets.QTableWidgetItem(f"{sale['name']}"))
+                                                PySide6.QtWidgets.QTableWidgetItem(item_name_obj))
             self.view_sales_tableWidget.setItem(row_count, 2,
                                                 PySide6.QtWidgets.QTableWidgetItem(f"{sale['quantity']}"))
             self.view_sales_tableWidget.setItem(row_count, 3,
                                                 PySide6.QtWidgets.QTableWidgetItem(f"£{sale['total']}"))
         self.view_sales_delete_button.show()
+        self.view_sales_edit_button.show()
     
 
     def date_to_str(self, date):

@@ -61,7 +61,8 @@ if __name__ == "__main__":
     window.show()
     app.exec()
 
-  # PUSH TO GIT AND CREATE MAIN WINDOW
+  # DOESNT CHANGE TEXT ON LIST WIDGET WHEN ITEM PRICE IS UPDATED IN MENU
+  # WHEN PRICE IS UPDATED YOU NEED TO ALSO UPDATE THE CHANGE PRICE FUNCTION
 
   # command to compile code
   # pyside6-uic widget.ui > widget_2.ui # then convert to utf8
